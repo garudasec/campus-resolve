@@ -22,7 +22,7 @@ const createAdmin = async () => {
 
         await User.create({
             name: "Admin",
-            email: "admin@gmail.com",
+            email: "admin@krmu.edu.in",
             password: hashedPassword,
             rollNo: "ADMIN001",
             course: "Administration",
