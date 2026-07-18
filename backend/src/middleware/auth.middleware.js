@@ -3,7 +3,7 @@
 // this middleware will verify token h? -> valid h -> req.user me payload dalo -> next()
 
 
-import jsonwebtoken from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 // import User from '../models/user.model.js';
 
 
@@ -16,14 +16,16 @@ const auth = async(req, res, next) => {
 
         if(!token) {
             return res.status(401).json({
-                message: "Access denied, No token provided.",
-                success: false
+                success: false,
+                message: "Access denied, No token provided."
             })
         }
 
-        const payload =  jsonwebtoken.verify(token, process.env.JWT_SECRET)  // jsonwebtoken ke aage await lagane ki need nahi coz,  jsonwebtoken.verify() callback ke bina synchronous return karta hai.
+        // jwt.verify() is synchornous when no callback is passed
+        const payload =  jwt.verify(token, process.env.JWT_SECRET)  // jwt ke aage await lagane ki need nahi coz,  jsonwebtoken.verify() callback ke bina synchronous return karta hai.
 
         req.user = payload;
+
 
         next()
         

@@ -18,20 +18,20 @@ const userSchema = new mongoose.Schema(
             required: true,
         },
 
+        // here will use sparse: true, true allows multiple documents to have null rollNo
         rollNo: {
             type: String,
-            required: false,
+            sparse: true,
             unique: true,
+
         },
 
         course: {
-            type: String,
-            required: false,
+            type: String
         },
 
         semester: {
             type: String,
-            required: false,
         },
 
         role: {

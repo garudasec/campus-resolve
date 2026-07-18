@@ -32,10 +32,7 @@ Controller
 
 const authorizeAdmin = (req, res, next) => {
     try {
-
-        const userRole = req.user.role;
-
-        if (userRole !== "admin") {
+        if (req.user.role !== "admin") {
             return res.status(403).json({
                 success: false,
                 message: "Access denied. Admin only.",
@@ -43,15 +40,12 @@ const authorizeAdmin = (req, res, next) => {
         }
 
         next();
-
     } catch (error) {
-
         return res.status(500).json({
             success: false,
             message: "Authorization failed",
             error: error.message,
         });
-
     }
 };
 
