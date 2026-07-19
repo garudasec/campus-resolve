@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 import api from "../services/api";
+import { Toast } from "../utils/toast.js";
 
 const STUDENT_EMAIL_REGEX = /^\d{10}@krmu\.edu\.in$/;
 const ROLL_NO_REGEX = /^\d{10}$/;
@@ -17,13 +17,6 @@ const courseOptions = [
     "Other",
 ];
 
-const Toast = Swal.mixin({
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true
-});
 
 const Register = () => {
     const navigate = useNavigate();
