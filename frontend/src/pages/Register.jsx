@@ -1,30 +1,93 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import api from "../services/api";
+
+const STUDENT_EMAIL_REGEX = /^\d{10}@krmu\.edu\.in$/;
+const ROLL_NO_REGEX = /^\d{10}$/;
+
+const courseOptions = [
+    "B.Tech CSE",
+    "B.Tech CSE Full Stack",
+    "B.Tech AI/ML",
+    "B.Tech UI/UX",
+    "B.Tech Cyber Security",
+    "BCA",
+    "B.Sc",
+    "Other",
+];
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true
+});
 
 const Register = () => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        name: "", email: "", password: "", rollNo: "", course: "", semester: "",
+        name: "", 
+        email: "", 
+        password: "", 
+        rollNo: "", 
+        course: "", 
+        semester: "",
     });
-    const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        setError("");
+        const { name, value } = e.target;
+        const nextValue = name === "rollNo" ? value.replace(/\D/g, "").slice(0, 10) : value;
+        
+        setFormData({ ...formData, [name]: nextValue });
+        setFieldErrors({ ...fieldErrors, [name]: "" });
+    };
+
+    const validate = () => {
+        const errors = {};
+
+        if (!ROLL_NO_REGEX.test(formData.rollNo)) {
+            errors.rollNo = "Roll number must be exactly 10 digits.";
+        }
+
+        if (!STUDENT_EMAIL_REGEX.test(formData.email)) {
+            errors.email = "Email must be in the format 10digitrollnumber@krmu.edu.in";
+        } else {
+            const emailRoll = formData.email.split("@")[0];
+            if (emailRoll !== formData.rollNo) {
+                errors.email = "Email roll number must match the Roll Number.";
+            }
+        }
+
+        if (!formData.course) {
+            errors.course = "Please select a course.";
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validate()) return;
+
         setIsLoading(true);
         try {
             const response = await api.post("/auth/register", formData);
-            alert(response.data.message);
+            Toast.fire({
+                icon: 'success',
+                title: response.data.message || "Registration successful"
+            });
             navigate("/login");
         } catch (err) {
-            setError(err.response?.data?.message || "Registration failed.");
+            Toast.fire({
+                icon: 'error',
+                title: err.response?.data?.message || "Registration failed."
+            });
         } finally {
             setIsLoading(false);
         }
@@ -33,7 +96,6 @@ const Register = () => {
     return (
         <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-slate-50 py-12">
             <div className="w-full max-w-lg">
-                {/* Brand */}
                 <div className="text-center mb-8">
                     <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 items-center justify-center shadow-lg mb-4">
                         <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,16 +107,7 @@ const Register = () => {
                 </div>
 
                 <div className="card p-8">
-                    {error && (
-                        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-                            <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p className="text-red-600 text-sm">{error}</p>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="form-label">Full Name</label>
@@ -64,17 +117,19 @@ const Register = () => {
                             </div>
                             <div>
                                 <label className="form-label">Roll Number</label>
-                                <input type="text" name="rollNo" placeholder="22CS101"
+                                <input type="text" name="rollNo" placeholder="2301010001" inputMode="numeric" maxLength={10}
                                     value={formData.rollNo} onChange={handleChange}
                                     className="form-input" required />
+                                {fieldErrors.rollNo && <p className="text-xs text-red-500 mt-1">{fieldErrors.rollNo}</p>}
                             </div>
                         </div>
 
                         <div>
                             <label className="form-label">Email Address</label>
-                            <input type="email" name="email" placeholder="you@college.edu"
+                            <input type="email" name="email" placeholder="2301010001@krmu.edu.in"
                                 value={formData.email} onChange={handleChange}
                                 className="form-input" required />
+                            {fieldErrors.email && <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>}
                         </div>
 
                         <div>
@@ -87,9 +142,13 @@ const Register = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="form-label">Course</label>
-                                <input type="text" name="course" placeholder="B.Tech CSE"
-                                    value={formData.course} onChange={handleChange}
-                                    className="form-input" required />
+                                <select name="course" value={formData.course} onChange={handleChange} className="form-input" required>
+                                    <option value="">Select your course</option>
+                                    {courseOptions.map((c) => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                                {fieldErrors.course && <p className="text-xs text-red-500 mt-1">{fieldErrors.course}</p>}
                             </div>
                             <div>
                                 <label className="form-label">Semester</label>
