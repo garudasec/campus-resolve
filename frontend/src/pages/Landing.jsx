@@ -37,7 +37,7 @@ const Landing = () => {
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
                         Campus issues,
                         <br />
-                        <span className="text-indigo-200">resolved faster.</span>
+                        <span className="text-indigo-200">resolved faster 🚀</span>
                     </h1>
                     <p className="text-lg text-indigo-200 max-w-xl mx-auto mb-10 leading-relaxed">
                         A streamlined platform for students to raise campus complaints and for admins to track and resolve them — end to end.

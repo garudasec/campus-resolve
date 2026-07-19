@@ -10,7 +10,7 @@ const createAdmin = async () => {
     try {
         await connectDB();
         const existingAdmin = await User.findOne({
-            email: "admin@gmail.com",
+            email: "admin@krmu.edu.in",
         });
 
         if (existingAdmin) {
@@ -18,7 +18,7 @@ const createAdmin = async () => {
             return;
         }
 
-        const hashedPassword = await bcrypt.hash("admin123", 10);
+        const hashedPassword = await bcrypt.hash("AdmiN123", 10);
 
         await User.create({
             name: "Admin",
