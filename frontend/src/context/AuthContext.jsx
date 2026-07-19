@@ -4,16 +4,19 @@ export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem("user");
-        return storedUser ? JSON.parse(storedUser) : null;
+        try {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        } catch {
+            localStorage.removeItem("user");
+            return null;
+        }
     });
 
     const [token, setToken] = useState(
-        () => localStorage.getItem("token") || ""
+        () => localStorage.getItem("token") || "",
     );
 
-    // Centralized logout — call this from any component instead of
-    // duplicating the localStorage cleanup logic everywhere
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -22,7 +25,9 @@ const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, token, setToken, logout }}>
+        <AuthContext.Provider
+            value={{ user, setUser, token, setToken, logout }}
+        >
             {children}
         </AuthContext.Provider>
     );
