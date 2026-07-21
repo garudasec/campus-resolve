@@ -28,12 +28,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            // Token expired or invalid — clear storage and go to login
+
+        // Only logout if a token actually exists
+        if (
+            error.response?.status === 401 &&
+            localStorage.getItem("token")
+        ) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             window.location.href = "/login";
         }
+
         return Promise.reject(error);
     }
 );
